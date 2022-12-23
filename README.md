@@ -28,8 +28,10 @@ to see how this shortens the repayment period.
 It is also possible to adjust and "upload" the Excel output to
 update the calculation (previous GUI).
 
-Translated with www.DeepL.com/Translator (free version)
-## Requirements
+<p align="center">
+<img src = "Repayment.png"><br/>
+<i> Repayment calculator </i>
+</p>
 
 Python (3.9)\
 openpyxl (3.0.9)\
