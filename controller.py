@@ -11,6 +11,7 @@ import numpy as np
 
 class Controller:
     def __init__(self):
+        self.columns = ["Year", "Loan", "Interests", "Repayment", "Loan rest", "Special payment"]
         self.main_gui = Main_GUI(self)
         
     def new_calculation(self, values: dict):
@@ -29,8 +30,7 @@ class Controller:
     def calculate(self, credit, interest, monthly_rate, special_repayment=None):
         year = 0
         initial_credit = credit
-        columns = ["Year", "Loan", "Interests", "Repayment", "Loan rest", "Special payment"]
-        df = pd.DataFrame(columns = columns)
+        df = pd.DataFrame(columns = self.columns)
         while credit > 0:
             annual_interest = 0
             annual_repayment = 0

@@ -8,22 +8,41 @@ Created on Fri Dec 23 09:09:15 2022
 import PySimpleGUI as sg
 import numpy as np
 import pandas as pd
+import pdfkit
+import jinja2
 
 class Result_GUI:
     def __init__(self, controller, results):
         self.controller = controller
         self.results = results
         self.layout = self.get_result_layout()
-        
+    
+    def export_results_pdf(self, results, year):
+        result_dict = dict()
+        counter = 0
+        for i in range(year):
+            for j in range(6):
+                result_dict["item%d" % counter] = (results[i][j])
+                counter += 1
+
+        template_loader = jinja2.FileSystemLoader("./")
+        template_env = jinja2.Environment(loader=template_loader)
+
+        template = template_env.get_template("html-model.html")
+        output_text = template.render(result_dict)
+
+        config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
+        pdfkit.from_string(output_text, "repayment overview.pdf", configuration=config, css="style.css")
+
     def get_result_layout(self, results=None):
         if results is None:
             results = self.results
         result_size=(12,1)
         header = [
-            sg.Text("Year:", size=result_size), sg.Text("Loan:", size=result_size), sg.Text("Interest:", size=result_size),
+            sg.Text("Year:", size=(6,1)), sg.Text("Loan:", size=result_size), sg.Text("Interest:", size=result_size),
             sg.Text("Repayment:", size=result_size), sg.Text("Loan rest", size=result_size), sg.Text("Special payment", size=result_size)]
         result_fields = [[
-            sg.Text(str(int(x[0])), size=result_size), sg.Text(str(x[1]), size=result_size), sg.Text(str(x[2]), size=result_size), 
+            sg.Text(str(int(x[0])), size=(6,1)), sg.Text(str(x[1]), size=result_size), sg.Text(str(x[2]), size=result_size), 
             sg.Text(str(x[3]), size=result_size), sg.Text(str(x[4]), size=result_size), 
             sg.InputText(key="input%d" % index, size=result_size, default_text=str(x[5]))] for index, x in enumerate(results)]
         buttons = [
@@ -41,7 +60,7 @@ class Result_GUI:
 
         result_layout = self.get_result_layout(results)
     
-        self.window = sg.Window("Repayment overview", result_layout, finalize=True)
+        self.window = sg.Window("Repayment overview", result_layout, finalize=True, resizable=True)
         self.window["OK"].bind("<Return>", "_Enter")
     
         while True:
@@ -52,6 +71,9 @@ class Result_GUI:
                 update = self.controller.calculate(initial_credit, interest, monthly_rate, special)
                 self.show_results(df=update[0], monthly_rate=monthly_rate, interest=interest, year=update[1], initial_credit=update[2], excel_output=excel_output)
             if event == sg.WINDOW_CLOSED or event == "OK":
+                break
+            if event == "print":
+                self.export_results_pdf(results, year)
                 break
             
     def update_results(self):

@@ -37,11 +37,11 @@ Python (3.9)\
 openpyxl (3.0.9)\
 PySimpleGUI (4.60.4)\
 numpy (1.20.3)\
+jinja2 (2.11.3)\
+pdfkit (1.0.0)\
 pandas (1.3.4)
 
 ## Misc
 
-23th Dec 2022:
-
-At the moment there is no output function to get a PDF report 
-for the results, what could be the next step.
+Additional software required. Please install WKhtmlTOpdf from https://wkhtmltopdf.org/downloads.html to generate 
+the repayment overview as a PDF output.
