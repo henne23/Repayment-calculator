@@ -14,6 +14,7 @@ Using PySimpleGUI to build a repayment calculator for debts.
 In this repository, I am trying to implement a simple repayment 
 calculator using PySimpleGUI. I also tried to implement to 
 MVC-concept for this project.
+
 ## Calculator
 
 The calculator starts with a simple GUI that asks for the repayment
@@ -29,6 +30,8 @@ It is also possible to adjust and "upload" the Excel output to
 update the calculation (previous GUI).
 
 ![repayment calculator](Repayment.PNG)
+
+## Requirements
 
 Python (3.9)\
 openpyxl (3.0.9)\
