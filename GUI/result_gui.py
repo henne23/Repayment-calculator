@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import pdfkit
 import jinja2
+import os
 
 class Result_GUI:
     def __init__(self, controller, results):
@@ -17,12 +18,37 @@ class Result_GUI:
         self.results = results
         self.layout = self.get_result_layout()
     
+    def create_html_page(self, year):
+        content = ["<hr />", '<p style="text-align: center;"><strong>Repayment overview</strong></p>', "<table>", "<tr>",
+        "<th>Year</th>", "<th>Loan</th>", "<th>Interests</th>", "<th>Repayment</th>", "<th>Loan rest</th>", 
+        "<th>Special repayment</th>", "</tr>"]
+        counter = 0
+        for i in range(year):
+            content.append("\t<tr>")
+            for j in range(6):
+                content.append("\t\t<td>{{item%d}}</td>" % counter)
+                counter += 1
+            content.append("\t</tr>")
+        content.append("</table>")
+
+        f = open("html-model.html", "w")
+        for line in content:
+            f.write(line + "\n")
+        f.close()
+
     def export_results_pdf(self, results, year):
         result_dict = dict()
+        new_results = []
+        for row in results:
+            new_row = []
+            for j in range(6):
+                # Include the currency and also place check buttons for the currency in the main GUI
+                new_row.append(int(row[j])) if j==0 else new_row.append("%.2f" % row[j])
+            new_results.append(new_row)
         counter = 0
         for i in range(year):
             for j in range(6):
-                result_dict["item%d" % counter] = (results[i][j])
+                result_dict["item%d" % counter] = (new_results[i][j])
                 counter += 1
 
         template_loader = jinja2.FileSystemLoader("./")
@@ -31,8 +57,10 @@ class Result_GUI:
         template = template_env.get_template("html-model.html")
         output_text = template.render(result_dict)
 
+        file_name = "repayment overview.pdf"
         config = pdfkit.configuration(wkhtmltopdf="C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe")
-        pdfkit.from_string(output_text, "repayment overview.pdf", configuration=config, css="style.css")
+        pdfkit.from_string(output_text, file_name, configuration=config, css="style.css")
+        os.startfile(file_name)
 
     def get_result_layout(self, results=None):
         if results is None:
@@ -46,7 +74,7 @@ class Result_GUI:
             sg.Text(str(x[3]), size=result_size), sg.Text(str(x[4]), size=result_size), 
             sg.InputText(key="input%d" % index, size=result_size, default_text=str(x[5]))] for index, x in enumerate(results)]
         buttons = [
-            sg.Button("OK", key="OK"), sg.Button("Update", key="update"), sg.Button("Print (no function)", key="print")]
+            sg.Button("OK", key="OK"), sg.Button("Update", key="update"), sg.Button("Print", key="print"), sg.Button("New", key="new")]
         result_layout = [
             [buttons, header, sg.Column(result_fields, scrollable=True, vertical_scroll_only=True, element_justification="c")]]
         return result_layout
@@ -73,8 +101,12 @@ class Result_GUI:
             if event == sg.WINDOW_CLOSED or event == "OK":
                 break
             if event == "print":
+                self.create_html_page(year)
                 self.export_results_pdf(results, year)
                 break
+            if event == "new":
+                self.window.close()
+                
             
     def update_results(self):
         try:
